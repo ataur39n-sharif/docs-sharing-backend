@@ -1,0 +1,2027 @@
+openapi: 3.0.3
+info:
+  title: Ecommerce - Backend API
+  description: Ecommerce backend api documentation
+  version: 1.0.0
+servers:
+  - description: localhost
+    url: "http://localhost:9000/api/v1"
+  - description: DTAL
+    url: "https://api.dreamfurniturebd.com/api/v1"
+  - description: live demo
+    url: "https://site-api.trelyt.store/api/v1"
+
+tags:
+  - name: Authentication
+    description: Access Control of website secure content
+  - name: Product
+    description: Product management path's
+  - name: Category
+    description: Category manage path's
+  - name: Order
+    description: Order manage path's
+  - name: Blog
+    description: Blog's manage path's
+  - name: Admin
+    description: Admin manage path's
+  - name: Files
+    description: Files manage path's'
+paths:
+  "/auth/login":
+    post:
+      tags:
+        - Authentication
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  properties:
+                    email:
+                      type: string
+                      example: abc@example.com
+                    password:
+                      type: string
+                      example: '@passW0Rd'
+                  required:
+                    - email
+                    - password
+                - type: object
+                  properties:
+                    phone:
+                      type: string
+                      example: 01111111111
+                    password:
+                      type: string
+                      example: '@passW0Rd'
+                  required:
+                    - phone
+                    - password
+      responses:
+        200:
+          description: Login Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    description: Success message
+                    example: Successfully logged in.
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+  "/auth/register":
+    post:
+      tags:
+        - Authentication
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: object
+                  properties:
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                password:
+                  type: string
+              required:
+                - name
+                - email
+                - phone
+                - password
+      responses:
+        201:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+  "/auth/create-account":
+    post:
+      tags:
+        - Admin
+      security:
+        - Authorization: [ ]
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: object
+                  properties:
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                email:
+                  type: string
+                  format: email
+                phoneNumber:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum:
+                    - customer
+                    - editor
+                    - administration
+                    - admin
+              required:
+                - name
+                - email
+                - phoneNumber
+                - password
+                - role
+      responses:
+        201:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+  "/auth/forget-password":
+    post:
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  properties:
+                    email:
+                      type: string
+                  required:
+                    - email
+                - type: object
+                  properties:
+                    phoneNumber:
+                      type: string
+                  required:
+                    - phoneNumber
+      responses:
+        200:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        404:
+          description: User not found
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    format: int32
+                    example: 404
+                  message:
+                    type: string
+                    example: Issue detected
+                  errorMessages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                          example: /api/v1/unknownRoute
+                        message:
+                          type: string
+                          example: not found
+        500:
+          $ref: "#/components/responses/500"
+  "/auth/resend-confirmation-mail":
+    post:
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "user@example.com"
+
+              required:
+                - email
+      responses:
+        200:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+  "/auth/reset-password":
+    patch:
+      tags:
+        - Authentication
+      parameters:
+        - in: header
+          name: token
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newPassword:
+                  type: string
+                  example: "@Passw0rd!"
+
+              required:
+                - newPassword
+      responses:
+        200:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+  "/auth/confirm-account":
+    post:
+      tags:
+        - Authentication
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+  "/auth/delete-account":
+    delete:
+      tags:
+        - Admin
+      security:
+        - Authorization: [ ]
+      parameters:
+        - in: path
+          name: User id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+  "/auth/change-password":
+    patch:
+      tags:
+        - Authentication
+      security:
+        - Authorization: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: string
+                  example: <PASSWORD>
+                newPassword:
+                  type: string
+                  example: <PASSWORD>
+              required:
+                - oldPassword
+                - newPassword
+      responses:
+        200:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+  "/products":
+    get:
+      tags:
+        - Product
+      parameters:
+        - $ref: "#/components/parameters/productSearch"
+        - $ref: "#/components/parameters/category"
+        - $ref: "#/components/parameters/productMinPriceFilter"
+        - $ref: "#/components/parameters/productMaxPriceFilter"
+        - $ref: "#/components/parameters/tags"
+        - $ref: "#/components/parameters/sortOrder"
+        - $ref: "#/components/parameters/sortBy"
+        - $ref: "#/components/parameters/status"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        200:
+          description: Success Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      products:
+                        type: array
+                        items:
+                          allOf:
+                            - $ref: "#/components/schemas/Product"
+                            - type: object
+                              properties:
+                                meta:
+                                  type: object
+                                  $ref: "#/components/schemas/PaginationMeta"
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+    post:
+      tags:
+        - Product
+      security:
+        - Authorization: [ ]
+      description: Before adding product make sure the product type and the schema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/Simple_Product"
+                - $ref: "#/components/schemas/Variable_Product"
+      responses:
+        201:
+          $ref: "#/components/responses/200"
+    delete:
+      tags:
+        - Product
+      security:
+        - Authorization: [ ]
+      description: Delete multiple product's at a time.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                products:
+                  type: array
+                  description: Array of product's id
+                  items:
+                    type: string
+                    example: "1234567890123456"
+      responses:
+        200:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        403:
+          $ref: "#/components/responses/403"
+        500:
+          $ref: "#/components/responses/500"
+  "/products/{slug}":
+    get:
+      tags:
+        - Product
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      description: Single product information
+      responses:
+        200:
+          description: Success Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Product"
+        400:
+          $ref: "#/components/responses/400"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          description: Product not found
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Product not found
+        500:
+          $ref: "#/components/responses/500"
+  "/products/{id}":
+    patch:
+      tags:
+        - Product
+      security:
+        - Authorization: [ ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: 'keyboard and mouse combo'
+                category:
+                  type: string
+                  example: '652a55aadb12dbc7b7cfb303'
+                productType:
+                  type: string
+                  enum:
+                    - 'simple_product'
+                    - 'variable_product'
+                  example: 'simple_product'
+                price:
+                  type: number
+                  example: 1020
+                discount:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: 'fixed'
+                      enum:
+                        - percentage
+                        - fixed
+                    value:
+                      type: integer
+                      example: 300
+                      format: init32
+                description:
+                  type: string
+                  example: 'Details for product'
+                short_description:
+                  type: string
+                  example: 'key features for product'
+                images:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - 'image1.jpg'
+                    - 'image2.jpg'
+                thumbnail:
+                  type: string
+                  example: 'thumbnail27.jpg'
+                stock:
+                  type: integer
+                  format: init32
+                  example: 30
+                attributes: &common_attribute
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                        example: 'Weight'
+                      values:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - 'light'
+                          - 'medium'
+                variableProducts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      price:
+                        type: number
+                        example: 30
+                      discount:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            example: 'percentage'
+                            enum:
+                              - percentage
+                              - fixed
+                          value:
+                            type: integer
+                            format: init32
+                            example: 30
+                      stock:
+                        type: integer
+                        format: init32
+                        example: 123
+
+                      attributes:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              example: 'color'
+                            value:
+                              type: string
+                              example: 'red'
+                tags:
+                  type: array
+                  items:
+                    type: string
+                    example: 'flash_sale'
+                metadata:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      example: "Iphone 15pro max in Bangladesh."
+                    description:
+                      type: string
+                      example: "This is meta description for the product page"
+              required:
+                - productType
+      responses:
+        200:
+          $ref: "#/components/responses/200"
+    delete:
+      tags:
+        - Product
+      security:
+        - Authorization: [ ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+  "/category":
+    get:
+      tags:
+        - Category
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: name
+          schema:
+            type: string
+        - in: query
+          name: slug
+          schema:
+            type: string
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - active
+              - inactive
+        - in: query
+          name: tags
+          schema:
+            type: string
+        - in: query
+          name: grouped
+          schema:
+            type: boolean
+        - in: query
+          name: sortOrder
+          description: based on Created time
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - in: query
+          name: page
+          schema:
+            type: number
+        - in: query
+          name: limit
+          schema:
+            type: number
+      responses:
+        200:
+          description: Success Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Category"
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+    post:
+      tags:
+        - Category
+      security:
+        - Authorization: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Cloths
+                slug:
+                  type: string
+                  example: cloths
+                icon:
+                  type: string
+                  example: "www.svg-icon.com"
+                parentId:
+                  type: string
+                  default: null
+                  example: "64fc35281bb369f5fb148389"
+              required:
+                - name
+                - icon
+                - slug
+      responses:
+        201:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      category:
+                        $ref: "#/components/schemas/Category"
+        400:
+          $ref: "#/components/responses/400"
+        403:
+          $ref: "#/components/responses/403"
+        500:
+          $ref: "#/components/responses/500"
+    patch:
+      tags:
+        - Category
+      security:
+        - Authorization: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryIds:
+                  type: array
+                  description: Array of category's id
+                  items:
+                    type: string
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - inactive
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      category:
+                        $ref: "#/components/schemas/Category"
+        400:
+          $ref: "#/components/responses/400"
+        403:
+          $ref: "#/components/responses/403"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - Category
+      security:
+        - Authorization: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryIds:
+                  type: array
+                  description: Array of category's id
+                  items:
+                    type: string
+      responses:
+        200:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        403:
+          $ref: "#/components/responses/403"
+        500:
+          $ref: "#/components/responses/500"
+  "/category/{id}":
+    get:
+      tags:
+        - Category
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: children
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: Success Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Category"
+    patch:
+      tags:
+        - Category
+      security:
+        - Authorization: [ ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                slug:
+                  type: string
+                icon:
+                  type: string
+                parentId:
+                  type: string
+                  example: 5f7a2db4a5e093001f076f5c
+                  default: null
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - inactive
+                  default: active
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      category:
+                        $ref: "#/components/schemas/Category"
+        400:
+          $ref: "#/components/responses/400"
+        403:
+          $ref: "#/components/responses/403"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - Category
+      security:
+        - Authorization: [ ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          $ref: "#/components/responses/200"
+        400:
+          $ref: "#/components/responses/400"
+        403:
+          $ref: "#/components/responses/403"
+        500:
+          $ref: "#/components/responses/500"
+  "/orders":
+    get:
+      tags:
+        - Order
+      parameters:
+        - in: query
+          name: orderId
+          schema:
+            type: string
+            example: 6517c22a1394cbab02092c51
+        - in: query
+          name: email
+          schema:
+            type: string
+            format: email
+            example: user@example.com
+        - in: query
+          name: status
+          schema:
+            type: string
+            example: paid
+            enum:
+              - pending
+              - paid
+              - shipped
+              - delivered
+              - cancelled
+        - in: query
+          name: sortOrder
+          schema:
+            type: string
+            example: asc
+            enum:
+              - asc
+              - desc
+      responses:
+        200:
+          description: Success Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Order"
+    post:
+      tags:
+        - Order
+      security:
+        - Authorization: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uid:
+                  type: string
+                  example: 6517c22a1394cbab02092c51
+                lineItems:
+                  type: array
+                  description: Product's information
+                  items:
+                    type: object
+                    properties:
+                      product:
+                        type: string
+                        example: '6517c22a1394cbab02092c51'
+                      variation:
+                        type: string
+                        default: null
+                        example: '6517c22a1394cbab02092c51'
+                      quantity:
+                        type: integer
+                        format: int32
+                        example: 4
+                      price:
+                        type: integer
+                        format: float
+                        example: 187.5
+                    required:
+                      - product
+                      - quantity
+                      - price
+                shippingAddress:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: Jhon Devin
+                    streetAddress:
+                      type: string
+                      example: 123 Main Street
+                    city:
+                      type: string
+                      example: Mohammadpur
+                    state:
+                      type: string
+                      example: Dhaka
+                    zipCode:
+                      type: integer
+                      format: init32
+                      example: 1600
+              required:
+                - uid
+                - lineItems
+                - shippingAddress
+      responses:
+        201:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                    example: Successfully order placed.
+                  data:
+                    $ref: '#/components/schemas/Order'
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+    patch:
+      tags:
+        - Order
+      security:
+        - Authorization: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderIds:
+                  type: array
+                  description: Array of order's id
+                  items:
+                    type: string
+                status:
+                  type: string
+                  enum:
+                    - pending
+                    - paid
+                    - shipped
+              required:
+                - orderIds
+                - status
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                    example: Successfully order updated.
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - Order
+      security:
+        - Authorization: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderIds:
+                  type: array
+                  description: Array of order's id
+                  items:
+                    type: string
+              required:
+                - orderIds
+                - status
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                    example: Successfully order deleted.
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+  "/orders/{id}":
+    get:
+      tags:
+        - Order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    $ref: "#/components/schemas/Order"
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+    patch:
+      tags:
+        - Order
+      security:
+        - Authorization: [ ]
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - pending
+                    - paid
+                    - shipped
+              required:
+                - orderIds
+                - status
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                    example: Successfully order information updated.
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - Order
+      security:
+        - Authorization: [ ]
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                    example: Successfully order deleted.
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+  /blogs:
+    get:
+      tags:
+        - Blog
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Successfully fetched data
+                  data:
+                    type: object
+                    properties:
+                      blogs:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Blog"
+                      meta:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                            example: 1
+                          limit:
+                            type: integer
+                            example: 10
+                          total:
+                            type: integer
+                            example: 100
+        400:
+          $ref: "#/components/responses/400"
+        500:
+          $ref: "#/components/responses/500"
+    post:
+      tags:
+        - Blog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: This is blog title
+                images:
+                  type: array
+                  items:
+                    type: string
+                    example: www.example.com
+                thumbnail:
+                  type: string
+                  example: www.example.com
+                content:
+                  type: string
+                  example: this is the description area of the blog.
+                slug:
+                  type: string
+                  example: this-is-blog-slug
+              required:
+                - title
+                - thumbnail
+                - slug
+                - content
+      responses:
+        201:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Successfully new blog created
+  "/files/upload":
+    post:
+      tags:
+        - Files
+      description: Upload files into cloud
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  description: Raw file data
+                - type: array
+                  items:
+                    type: object
+                    description: Raw file data
+      responses:
+        200:
+          $ref: '#/components/responses/200'
+
+components:
+  responses:
+    200:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                description: Success message
+                example: Successfully done this task.
+    400:
+      description: Bad request
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 400
+              message:
+                type: string
+                example: Issue detected
+              errorMessages:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    path:
+                      type: string
+                      example: /api/v1
+                    message:
+                      type: string
+                      example: details of the issue
+    403:
+      description: Forbidden
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Permission denied.
+    404:
+      description: Route not found
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 404
+              message:
+                type: string
+                example: Issue detected
+              errorMessages:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    path:
+                      type: string
+                      example: /api/v1/unknownRoute
+                    message:
+                      type: string
+                      example: not found
+    500:
+      description: Server error
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 500
+              message:
+                type: string
+                example: Something went wrong
+              errorMessages:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    path:
+                      type: string
+                      example: ""
+                    message:
+                      type: string
+                      example: ""
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "64fc35281bb369f5fb148389"
+        name:
+          type: string
+          example: 'keyboard and mouse combo'
+        slug:
+          type: string
+          example: 'slug_for_this_product'
+        category:
+          type: string
+          example: '652a55aadb12dbc7b7cfb303'
+        productType:
+          type: string
+          enum:
+            - 'simple_product'
+            - 'variable_product'
+          example: 'simple_product'
+        price:
+          type: number
+          example: 1020
+        discount:
+          type: object
+          properties:
+            type:
+              type: string
+              example: 'fixed'
+              enum:
+                - percentage
+                - fixed
+            value:
+              type: integer
+              example: 300
+              format: init32
+        description:
+          type: string
+          example: 'Details for product'
+        short_description:
+          type: string
+          example: 'key features for product'
+        images:
+          type: array
+          items:
+            type: string
+          example:
+            - 'image1.jpg'
+            - 'image2.jpg'
+        thumbnail:
+          type: string
+          example: 'thumbnail27.jpg'
+        stock:
+          type: integer
+          format: init32
+          example: 30
+        attributes: &common_attribute
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+                example: 'Weight'
+              values:
+                type: array
+                items:
+                  type: string
+                example:
+                  - 'light'
+                  - 'medium'
+        variableProducts:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+              price:
+                type: number
+                example: 30
+              discount:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: 'percentage'
+                    enum:
+                      - percentage
+                      - fixed
+                  value:
+                    type: integer
+                    format: init32
+                    example: 30
+              stock:
+                type: integer
+                format: init32
+                example: 123
+
+              attributes:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: 'color'
+                    value:
+                      type: string
+                      example: 'red'
+        tags:
+          type: array
+          items:
+            type: string
+            example:
+              - 'flash_sale'
+              - 'popular'
+        metadata:
+          type: object
+          properties:
+            title:
+              type: string
+              example: "Iphone 15pro max in Bangladesh."
+            description:
+              type: string
+              example: "This is meta description for the product page"
+    Simple_Product:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Smart watch'
+        slug:
+          type: string
+          example: 'slug_for_this_product'
+        category:
+          type: string
+          example: '652a55aadb12dbc7b7cfb303'
+        productType:
+          type: string
+          enum:
+            - 'simple_product'
+          example: 'simple_product'
+        price:
+          type: number
+          example: 2500
+        discount:
+          type: object
+          properties:
+            type:
+              type: string
+              example: 'fixed'
+              enum:
+                - percentage
+                - fixed
+            value:
+              type: integer
+              format: init32
+              example: 300
+        images:
+          type: array
+          items:
+            type: string
+          example:
+            - 'image1.jpg'
+            - 'image2.jpg'
+            - 'image3.jpg'
+        thumbnail:
+          type: string
+          example: 'thumbnail.jpg'
+        stock:
+          type: integer
+          format: init32
+          example: 100
+        description:
+          type: string
+          example: 'Product details description'
+        short_description:
+          type: string
+          example: 'Product short description'
+        attributes:
+          type: array
+          items:
+            properties:
+              label:
+                type: string
+                example: 'color'
+              values:
+                type: array
+                items:
+                  type: string
+                example:
+                  - 'black'
+                  - 'white'
+                  - 'red'
+        tags:
+          type: array
+          items:
+            type: string
+          example:
+            - 'black_friday'
+        metadata:
+          type: object
+          properties:
+            title:
+              type: string
+              example: "Iphone 15pro max in Bangladesh."
+            description:
+              type: string
+              example: "This is meta description for the product page"
+      required:
+        - name
+        - category
+        - price
+        - images
+        - thumbnail
+        - description
+        - metadata
+    Variable_Product:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Xiaomi M12'
+        slug:
+          type: string
+          example: 'slug_for_this_product'
+        category:
+          type: string
+          example: '652a55aadb12dbc7b7cfb303'
+        productType:
+          type: string
+          enum:
+            - 'variable_product'
+          example: 'variable_product'
+        price:
+          type: number
+          example: 21000
+        description:
+          type: string
+          example: 'product description'
+        short_description:
+          type: string
+          example: 'product short description'
+        images:
+          type: array
+          items:
+            type: string
+          example:
+            - 'image1.jpg'
+            - 'image2.jpg'
+            - 'image3.jpg'
+        thumbnail:
+          type: string
+          example: 'thumbnail.jpg'
+        attributes:
+          type: array
+          items:
+            properties:
+              label:
+                type: string
+                example: 'ram'
+              values:
+                type: array
+                items:
+                  type: string
+                example:
+                  - 2
+                  - 4
+                  - 6
+        variableProducts:
+          type: array
+          items:
+            type: object
+            properties:
+              image:
+                type: string
+                example: 'image.jpg'
+              price:
+                type: number
+                example: 20000
+              stock:
+                type: integer
+                example: 100
+              attributes:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    label:
+                      type: string
+                      example: 'ram'
+                    value:
+                      type: string
+                      example: 6
+              discount:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: 'fixed'
+                    enum:
+                      - percentage
+                      - fixed
+                  value:
+                    type: integer
+                    format: init32
+                    example: 300
+            required:
+              - price
+              - attributes
+        tags:
+          type: array
+          items:
+            type: string
+            example:
+              - 'flash_sale'
+              - 'hot_deals'
+        metadata:
+          type: object
+          properties:
+            title:
+              type: string
+              example: "Iphone 15pro max in Bangladesh."
+            description:
+              type: string
+              example: "This is meta description for the product page"
+      required:
+        - name
+        - category
+        - price
+        - images
+        - thumbnail
+        - description
+        - attributes
+        - variableProducts
+        - metadata
+    Category:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        icon:
+          type: string
+        parentId:
+          type: string
+          example: 5f7a2db4a5e093001f076f5c
+          default: null
+        status:
+          type: string
+          enum:
+            - active
+            - inactive
+          default: active
+        tags:
+          type: array
+          items:
+            type: string
+    Reviews:
+      type: object
+      properties:
+        _id:
+          type: string
+        orderId:
+          type: string
+        uid:
+          type: string
+        ratting:
+          type: integer
+          format: init32
+          maximum: 5
+          default: 5
+        comments:
+          type: string
+          default: ""
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: init32
+        limit:
+          type: integer
+          format: init32
+        total:
+          type: integer
+          format: init32
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 6517c22a1394cbab02092c51
+        uid:
+          type: string
+          example: 6517c22a1394cbab02092c51
+        lineItems:
+          type: array
+          description: Product's information
+          items:
+            type: object
+            properties:
+              product:
+                type: string
+                example: '6517c22a1394cbab02092c51'
+              variation:
+                type: string
+                default: null
+                example: '6517c22a1394cbab02092c51'
+              quantity:
+                type: integer
+                format: int32
+                example: 4
+              price:
+                type: integer
+                format: float
+                example: 187.5
+        shippingAddress:
+          type: object
+          properties:
+            name:
+              type: string
+              example: Jhon Devin
+            streetAddress:
+              type: string
+              example: 123 Main Street
+            city:
+              type: string
+              example: Mohammadpur
+            state:
+              type: string
+              example: Dhaka
+            zipCode:
+              type: integer
+              format: init32
+              example: 1120
+        subtotal:
+          type: integer
+          format: init32
+          example: 750
+        shippingCharge:
+          type: integer
+          format: init32
+          example: 50
+        total:
+          type: integer
+          format: init32
+          example: 800
+    Blog:
+      type: object
+      properties:
+        title:
+          type: string
+          example: This is blog title
+        images:
+          type: array
+          items:
+            type: string
+            example: www.example.com
+        thumbnail:
+          type: string
+          example: www.example.com
+        content:
+          type: string
+          example: this is the description area of the blog.
+        slug:
+          type: string
+          example: this-is-blog-slug
+        status:
+          type: string
+          enum:
+            - pending
+            - published
+            - draft
+          example: pending
+  parameters:
+    productSearch:
+      in: query
+      name: search
+      description: search by name,category
+      schema:
+        type: string
+    status:
+      in: query
+      name: status
+      description: filter by status
+      schema:
+        type: string
+        enum:
+          - published
+          - unpublished
+    category:
+      in: query
+      name: category
+      description: filter by category
+      schema:
+        type: string
+    tags:
+      in: query
+      name: tags
+      description: filter by tags
+      schema:
+        type: string
+    page:
+      in: query
+      name: page
+      description: jump to page
+      schema:
+        type: number
+    limit:
+      in: query
+      name: limit
+      description: limit data per request
+      schema:
+        type: number
+    productMinPriceFilter:
+      in: query
+      name: min_price
+      description: filter by price
+      schema:
+        type: string
+    productMaxPriceFilter:
+      in: query
+      name: max_price
+      description: filter by price
+      schema:
+        type: string
+    sortBy:
+      in: query
+      name: sortBy
+      description: sort by property
+      schema:
+        type: string
+        enum:
+          - name
+          - price
+          - createdAt
+          - updatedAt
+    sortOrder:
+      in: query
+      name: sortOrder
+      description: Mark sort order Ascending or descending
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+  securitySchemes:
+    Authorization:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
