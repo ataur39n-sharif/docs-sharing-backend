@@ -2,13 +2,13 @@
     express application root file
 */
 
-import express, {Application} from 'express'
-import cors from 'cors'
-import {v2 as cloudinary} from 'cloudinary';
+import config from "@/Config";
 import globalErrorHandler from "@/Middlewares/Errors/globalErrorHandler";
 import notFoundHandler from "@/Middlewares/Errors/notFoundHandler";
+import { v2 as cloudinary } from 'cloudinary';
+import cors from 'cors';
+import express, { Application } from 'express';
 import configRoutes from './Routes/config';
-import config from "@/Config";
 
 const app: Application = express()
 app.use(express.json())

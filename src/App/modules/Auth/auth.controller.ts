@@ -12,9 +12,7 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 
 const singUp = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-
-    const data = pickFunction(req.body, ['name', 'email', 'password', 'phone'])
-    const validate = AuthValidation.authPayload.parse(data)
+    const validate = AuthValidation.authPayload.parse(req.body)
     await AuthServices.CreateNewAccount(validate)
 
     MailService.confirmAccount({
@@ -29,11 +27,9 @@ const singUp = catchAsync(async (req: Request, res: Response, next: NextFunction
 })
 
 const createAccountByAdmin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-
-    const data = pickFunction(req.body, ['name', 'email', 'password', 'phone', 'role'])
     const validate = AuthValidation.authPayload.extend({
         role: z.enum([ERole.admin, ERole.customer, ERole.administration, ERole.editor]),
-    }).parse(data)
+    }).parse(req.body)
     await AuthServices.CreateNewAccount(validate)
 
     MailService.confirmAccount({
@@ -51,29 +47,26 @@ const login = catchAsync(async (req: Request, res: Response, next: NextFunction)
     const data = pickFunction(req.body, ["email", "phone", 'password'])
     const validateData = AuthValidation.singIn.parse(data)
 
-    const {refreshToken, ...info} = await AuthServices.logIntoAccount(validateData)
-
-    // if (info.role !== 'customer') throw new CustomError('Permission ', 401)
+    const { refreshToken, ...info } = await AuthServices.logIntoAccount(validateData)
 
     res.cookie('refreshToken', refreshToken)
     sendResponse.success(res, {
-        data: {...info},
+        data: { ...info },
         message: "Successfully logged in",
         statusCode: 200
     })
 })
 
 const adminLogin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const data = pickFunction(req.body, ["email", 'password'])
-    const validateData = AuthValidation.singIn.parse(data)
+    const validateData = AuthValidation.singIn.parse(req.body)
 
-    const {refreshToken, ...info} = await AuthServices.logIntoAccount(validateData)
+    const { refreshToken, ...info } = await AuthServices.logIntoAccount(validateData)
 
     if (info.role !== 'admin') throw new CustomError('Permission denied', 401)
 
     res.cookie('refreshToken', refreshToken)
     sendResponse.success(res, {
-        data: {...info},
+        data: { ...info },
         message: "Successfully logged in",
         statusCode: 200
     })
@@ -94,13 +87,9 @@ const resendConfirmationMail = catchAsync(async (req: Request, res: Response, ne
 })
 
 const forgetPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const {email} = pickFunction(req.body, ['email', 'phoneNumber'])
-
-    //todo: when user input phone number , action will perform by sms.
-
     const validate = z.object({
         email: z.string().email()
-    }).parse({email})
+    }).parse({ email: req.body.email })
 
     await MailService.forgetPassword({
         userEmail: validate.email
@@ -113,7 +102,7 @@ const forgetPassword = catchAsync(async (req: Request, res: Response, next: Next
 })
 
 const resetPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const data = pickFunction({...req.body, ...req.headers}, ['newPassword', 'token'])
+    const data = pickFunction({ ...req.body, ...req.headers }, ['newPassword', 'token'])
     const token = z.string().parse(data.token)
     const validateToken = jwt.verify(token, String(config.jwt.common)) as { userEmail: string }
 
@@ -125,7 +114,7 @@ const resetPassword = catchAsync(async (req: Request, res: Response, next: NextF
         password: data.newPassword
     })
 
-    console.log({validate})
+    // console.log({ validate })
 
     await AuthServices.resetPassword(validate.email, validate.password)
 
@@ -153,7 +142,7 @@ const confirmAccount = catchAsync(async (req: Request, res: Response, next: Next
 
 const changePassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const data = pickFunction(req.body, ['oldPassword', 'newPassword', 'email'])
-    const {email, newPassword, oldPassword} = AuthValidation.changePassword.parse(data)
+    const { email, newPassword, oldPassword } = AuthValidation.changePassword.parse(data)
 
     await AuthServices.changePassword(email, oldPassword, newPassword)
 
