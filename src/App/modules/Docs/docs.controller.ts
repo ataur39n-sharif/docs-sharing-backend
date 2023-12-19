@@ -24,7 +24,11 @@ const getSpecificDoc = catchAsync(async (req: Request, res: Response, next: Next
     })
 })
 const newDocs = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const payload = DocsValidation.docsZodSchema.parse(req.body)
+    console.log(req.body)
+    const payload = DocsValidation.docsZodSchema.parse({
+        ...req.body,
+        uid:new Types.ObjectId(req.body.uid)
+    })
     const data = await DocumentService.create(payload)
     sendResponse.success(res, {
         statusCode: 201,

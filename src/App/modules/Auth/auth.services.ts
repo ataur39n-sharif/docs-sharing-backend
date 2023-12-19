@@ -47,7 +47,7 @@ const CreateNewAccount = async (data: Partial<IAuthWithName>): Promise<IAuthProp
 
 
 const logIntoAccount = async (data: Partial<IAuthProperty>) => {
-    let user: IAuthProperty | null = await AuthModel.findOne({ email: data.email });
+    let user: IAuthProperty | null = await AuthModel.findOne({ email: data.email }).populate('uid');
 
     console.log({ user })
     //valid password
@@ -58,10 +58,12 @@ const logIntoAccount = async (data: Partial<IAuthProperty>) => {
     if (user.status === 'blocked') throw new CustomError('Something went wrong. Please contact the support.', 401)
 
     const tokenData: TokenPayload = {
-        uid: user._id as string,
+        uid: (user.uid as any)._id as string,
         role: user.role,
-        email: user.email
+        email: user.email,
     }
+
+    console.log({tokenData})
 
     const accessToken = generateToken.accessToken(tokenData)
     const refreshToken = generateToken.refreshToken(tokenData)
@@ -69,7 +71,8 @@ const logIntoAccount = async (data: Partial<IAuthProperty>) => {
     return {
         accessToken,
         refreshToken,
-        ...tokenData
+        ...tokenData,
+        name:(user.uid as any).name
     }
 }
 

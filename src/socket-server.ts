@@ -21,12 +21,16 @@ export const activeSocketServer =(io: Server<DefaultEventsMap, DefaultEventsMap,
     io.on('connection', (socket) => {
         const id  = socket.handshake.query.id
         console.log(id,socket.id)
-        socket.broadcast.emit('joined-to-edit', entryALog({
+        socket.emit('joined-to-edit', entryALog({
             type: 'alert',
             message: "A new user joined to edit.",
             receiver:null,
             sender:'system'
         }))
+
+        socket.on('sendMessage',(payload:TLog)=>{
+            socket.emit('receiveMessage', `Received message from ${payload.sender}`)
+        })
 
         socket.on('disconnect',(reason)=>{
             console.log(`user disconnected. Id ${socket.id}.  ${reason}`)
