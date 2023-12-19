@@ -25,10 +25,6 @@ export const activeSocketServer =(io: Server<DefaultEventsMap, DefaultEventsMap,
         }  = socket.handshake.query
         console.log(id,name,roomNumber)
 
-        let rooms:string[] =[]
-        // if (rooms.find((room)=> room === roomNumber)){
-        //     socket.join(roomNumber as  string)
-        // }
         socket.on('joinRoom', ({name,roomNumber}) => {
             console.log('join room',{name,roomNumber})
             socket.join(roomNumber as string);
@@ -49,6 +45,11 @@ export const activeSocketServer =(io: Server<DefaultEventsMap, DefaultEventsMap,
         //     receiver:null,
         //     sender:'System'
         // }))
+
+        socket.on('typing',(roomNumber,data)=>{
+            console.log('typing',roomNumber,data)
+            io.to(roomNumber).emit('typing-notify',data);
+        })
 
         socket.on('sendMessage',(payload:{
             roomNumber:string,
