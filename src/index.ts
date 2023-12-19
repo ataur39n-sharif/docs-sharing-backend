@@ -6,11 +6,26 @@ import config from "@/Config";
 import connectDB from "@/Config/db";
 import app from "@/app";
 import http from "http";
+import {Server} from "socket.io";
+import {activeSocketServer} from "@/socket-server";
 
 const server = http.createServer(app)
 const {port} = config
 
+//socket server
+const io = new Server(server,{
+    connectionStateRecovery: {
+        maxDisconnectionDuration:10000
+    },
+    cors:{
+        origin:[
+            'http://localhost:3000'
+        ]
+    }
+});
+activeSocketServer(io)
 
+// server listening
 const main = async () => {
     try {
         await connectDB()
