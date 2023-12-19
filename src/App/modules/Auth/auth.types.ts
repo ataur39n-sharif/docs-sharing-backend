@@ -4,7 +4,8 @@ export enum ERole {
     admin = 'admin',
     administration = 'administration',
     editor = 'editor',
-    customer = 'customer'
+    customer = 'customer',
+    user='user'
 }
 
 export enum EAccountStatus {

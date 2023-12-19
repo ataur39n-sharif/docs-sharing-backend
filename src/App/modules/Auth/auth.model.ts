@@ -14,17 +14,6 @@ const dataSchema = new Schema<IAuthProperty, IAuthModel>({
             message: "Email must be unique.",
         }
     },
-    phone: {
-        type: String,
-        required: true,
-        validate: {
-            validator: async (value: string): Promise<boolean> => {
-                const result = await AuthModel.countDocuments({phone: value})
-                return result === 0
-            },
-            message: "Phone number must be unique.",
-        }
-    },
     password: {
         type: String,
         required: true

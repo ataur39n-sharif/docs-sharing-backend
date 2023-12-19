@@ -29,9 +29,8 @@ const CreateNewAccount = async (data: Partial<IAuthWithName>): Promise<IAuthProp
             name: data.name,
             email: data.email,
             password: data.password,
-            phone: data.phone,
             uid: userData._id,
-            role: data.role || ERole.customer, // only admin can define role in user created time
+            role: data.role || ERole.user,
             status: EAccountStatus.pending
         })
         const newUser = new AuthModel(validateUserCreation)

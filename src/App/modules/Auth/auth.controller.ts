@@ -15,14 +15,9 @@ const singUp = catchAsync(async (req: Request, res: Response, next: NextFunction
     const validate = AuthValidation.authPayload.parse(req.body)
     await AuthServices.CreateNewAccount(validate)
 
-    MailService.confirmAccount({
-        name: validate.name.firstName,
-        userEmail: validate.email
-    })
-
     sendResponse.success(res, {
         statusCode: 201,
-        message: "An confirmation email was sent to your mail. Please follow that instructions."
+        message: "Account created successfully. Please login your account."
     })
 })
 
