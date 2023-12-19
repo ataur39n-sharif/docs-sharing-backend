@@ -39,16 +39,18 @@ export const activeSocketServer =(io: Server<DefaultEventsMap, DefaultEventsMap,
             }));
         });
 
-        // socket.emit('joined-to-edit', entryALog({
-        //     type: 'alert',
-        //     message: `${name} joined this room.`,
-        //     receiver:null,
-        //     sender:'System'
-        // }))
-
         socket.on('typing',(roomNumber,data)=>{
             console.log('typing',roomNumber,data)
             io.to(roomNumber).emit('typing-notify',data);
+        })
+
+        socket.on('update-docs',(roomNumber,name)=>{
+            io.to(roomNumber).emit('update-docs-notify',entryALog({
+                type: 'alert',
+                message: `${name as string} updated this document.`,
+                receiver:null,
+                sender:'System'
+            }));
         })
 
         socket.on('sendMessage',(payload:{
