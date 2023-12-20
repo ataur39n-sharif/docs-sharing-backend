@@ -5,7 +5,7 @@
 <img src="https://raw.githubusercontent.com/PKief/vscode-material-icon-theme/ec559a9f6bfd399b82bb44393651661b08aaf7ba/icons/nodejs_alt.svg" width="100" />
 
 <br>
-Ecommerce Backend
+Document sharing Backend
 
 </h1>
 
@@ -16,7 +16,7 @@ Ecommerce Backend
 
 <img src="https://img.shields.io/badge/JavaScript-F7DF1E.svg?style&logo=JavaScript&logoColor=black" alt="JavaScript" />
 
-<img src="https://img.shields.io/badge/Jest-C21325.svg?style&logo=Jest&logoColor=white" alt="Jest" />
+[//]: # (<img src="https://img.shields.io/badge/Jest-C21325.svg?style&logo=Jest&logoColor=white" alt="Jest" />)
 
 <img src="https://img.shields.io/badge/Nodemon-76D04B.svg?style&logo=Nodemon&logoColor=white" alt="Nodemon" />
 
@@ -62,10 +62,9 @@ Ecommerce Backend
 
 ## Introduction
 
-The E-Commerce Backend project is a robust and flexible backend system designed to power e-commerce applications. It
-provides a solid foundation for building single vendor online store, managing products, handling user authentication,
-processing
-orders, and collecting customer reviews and feedback.
+This is a simple document sharing project. Here user can Manage document(CRUD). 
+While updating a document user can see who is typing or updating the document in realtime.
+
 
 ## Features
 
@@ -94,12 +93,6 @@ Here is an overview of your project's folder structure:
 ├── src/                # Source code directory
 │   ├── App/            # Main application code
 │   │   ├── modules/    # Modules for various features
-│   │   │   ├── Auth/   # Authentication related code
-│   │   │   ├── User/   # User management code
-│   │   │   ├── Products/   # Product-related code
-│   │   │   ├── Category/   # Category-related code
-│   │   │   ├── Orders/   # Order management code
-│   │   │   └── Review/   # Review and feedback code
 │   ├── Config/         # Configuration files
 │   ├── Middlewares/    # Express middlewares
 │   ├── Routes/         # API route definitions
@@ -127,7 +120,7 @@ Provide step-by-step instructions on how to install and set up your application 
 
 ```sh
 
-git clone https://github.com/ataur39n-sharif/ecommerce-backend
+git clone https://github.com/ataur39n-sharif/docs-sharing-backend
 
 ```
 
@@ -135,7 +128,7 @@ git clone https://github.com/ataur39n-sharif/ecommerce-backend
 
 ```sh
 
-cd ecommerce-backend
+cd docs-sharing-backend
 
 ```
 
